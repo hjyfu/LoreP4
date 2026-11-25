@@ -64,6 +64,7 @@ impl P4 {
     }
     fn cmd(&self, client: Option<&str>) -> Command {
         let mut cmd = Command::new("p4");
+        cmd.env_remove("PWD");
         cmd.args(["-p", &self.port]);
         if let Some(u) = &self.user {
             cmd.args(["-u", u]);
@@ -629,7 +630,13 @@ impl P4 {
                 .strip_prefix(prefix)
                 .context("destination CL also changes paths outside the migration scope")?;
             if path != MARKER {
-                changed.insert(unescape(path), field(d, &format!("action{i}"))?.to_owned());
+                changed.insert(
+                    unescape(path),
+                    (
+                        field(d, &format!("action{i}"))?,
+                        field(d, &format!("type{i}"))?,
+                    ),
+                );
             }
         }
         ensure!(
@@ -637,8 +644,13 @@ impl P4 {
             "unexpected files in destination CL {cl}"
         );
         for e in &rev.edits {
-            let action = changed.get(&e.path).context("missing submitted path")?;
+            let (action, kind) = changed.get(&e.path).context("missing submitted path")?;
             if let Some(expected) = &e.blob {
+                ensure!(
+                    *kind == e.file_type.as_deref().unwrap_or("binary"),
+                    "type mismatch at CL {cl}: {}",
+                    e.path
+                );
                 self.print(&format!("{prefix}{}@={cl}", escape(&e.path)), tmp.path())?;
                 ensure!(
                     hash(tmp.path())? == *expected,

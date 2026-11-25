@@ -5,6 +5,7 @@ permissions:
 jobs:
   rust:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
@@ -27,6 +28,7 @@ jobs:
             chmod +x "$bin/$program"
           done
           curl -fsSL --retry 3 https://github.com/EpicGames/lore/releases/download/v0.14.0/lore-v0.14.0-x86_64-unknown-linux-gnu.tar.gz -o "$bin/lore.tar.gz"
+          echo "c2fe93b416a99fd7375ff9e94426c380bf3239fd4f9af9c9673000002fad52c3  $bin/lore.tar.gz" | sha256sum -c -
           tar -xzf "$bin/lore.tar.gz" -C "$bin"
           lore_bin=$(find "$bin" -type f -name lore -print -quit)
           PATH="$(dirname "$lore_bin"):$bin:$PATH" python3 tests/roundtrip.py --cli target/release/lorep4 --p4d "$bin/p4d"

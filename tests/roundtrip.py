@@ -11,7 +11,7 @@ import time
 
 def exercise(root, port, cli, env):
     def run(args, *, at=root, data=None, ok=True):
-        result = subprocess.run(args, cwd=at, env=env, input=data, capture_output=True)
+        result = subprocess.run(args, cwd=at, env={**env, "PWD": str(at)}, input=data, capture_output=True)
         if (result.returncode == 0) != ok:
             raise RuntimeError(f"{args}: {result.stdout.decode(errors='replace')}\n{result.stderr.decode(errors='replace')}")
         return result.stdout
