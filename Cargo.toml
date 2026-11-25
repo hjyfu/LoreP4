@@ -1,0 +1,16 @@
+[package]
+name = "lorep4"
+version = "0.1.0"
+edition = "2024"
+description = "Migrate submitted history between Perforce Helix Core and Epic Games Lore"
+repository = "https://github.com/hjyfu/LoreP4"
+license = "MIT"
+
+[dependencies]
+anyhow = "1"
+blake3 = "1"
+md-5 = "0.10"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
